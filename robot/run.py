@@ -4,7 +4,7 @@
 
 1. fetch the latest weekly prices from GOV.UK
 2. save any new (or revised) weeks to data/prices.db
-3. redraw charts/prices.png if anything changed
+3. redraw charts/prices.png and rewrite data/prices.csv (for Power BI) if anything changed
 4. if a new week came in and petrol or diesel moved more than 5%, write alert.md
    (the workflow turns that file into a GitHub issue, which emails me)
 """
@@ -16,7 +16,8 @@ from pathlib import Path
 from robot import alert, chart, source, store
 
 
-def run(conn, fetch=source.fetch_prices, alert_file=None, owner=None, test_alert=False, chart_path=None):
+def run(conn, fetch=source.fetch_prices, alert_file=None, owner=None, test_alert=False, chart_path=None,
+        csv_path=None):
     try:
         prices = fetch()
     except source.SourceError as exc:
@@ -33,6 +34,8 @@ def run(conn, fetch=source.fetch_prices, alert_file=None, owner=None, test_alert
     print(summary)
     if chart_path and (new_weeks or changed or not Path(chart_path).exists()):
         chart.draw(conn, chart_path)
+    if csv_path and (new_weeks or changed or not Path(csv_path).exists()):
+        store.export_csv(conn, csv_path)
     if len(recent) < 2:
         return 0  # need two weeks to compare
     previous = recent[1]
@@ -54,7 +57,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     conn = store.connect(args.db)
     return run(conn, alert_file=args.alert_file, owner=os.environ.get("ALERT_MENTION"), test_alert=args.test_alert,
-               chart_path=args.chart)
+               chart_path=args.chart, csv_path=Path(args.db).parent / "prices.csv")
 
 
 if __name__ == "__main__":
