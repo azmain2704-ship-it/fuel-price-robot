@@ -16,7 +16,7 @@ The follow-up to my [UK fuel prices](https://github.com/azmain2704-ship-it/uk-fu
 1. **Every day at 07:17 UTC** GitHub Actions runs `python -m robot.run` ([daily.yml](.github/workflows/daily.yml)).
 2. The robot asks the **GOV.UK Content API** where the latest weekly prices CSV is. The government uploads a new file every week under a different URL, so hard-coding the link would break after a week. The Content API is public and needs no key.
 3. It downloads the CSV and saves any new weeks to a **SQLite database** (`data/prices.db`). If the government revises an old week, the robot updates it. If nothing has changed, it saves nothing.
-4. If anything changed, it redraws `charts/prices.png` with matplotlib.
+4. If anything changed, it redraws `charts/prices.png` with matplotlib and rewrites `data/prices.csv`, a plain copy of every week in pence for Power BI or a spreadsheet.
 5. Every run gets logged in the database, failed ones included, and the Action commits the database and chart back to the repo. The commit history doubles as a log of the robot working.
 6. If a **new** week has come in and either fuel moved more than 5%, the Action opens a GitHub issue and @mentions me, so GitHub emails me. It only checks when a new week arrives. Otherwise the same jump would get reported every day until the next update.
 
@@ -66,7 +66,7 @@ streamlit run dashboard.py      # open the dashboard
 
 ## Tests
 
-`pytest` runs 31 tests against a saved copy of the real CSV and a fake API response, so they don't need the internet. They cover:
+`pytest` runs 34 tests against a saved copy of the real CSV and a fake API response, so they don't need the internet. They cover:
 
 - finding the right CSV (not the old 2003 to 2017 one)
 - reading the real file format
@@ -75,7 +75,7 @@ streamlit run dashboard.py      # open the dashboard
 - the 5% rule (exactly 5% doesn't count)
 - an alert only firing once per jump
 - failures getting logged
-- the chart only being redrawn when something changed
+- the chart and the CSV only being rewritten when something changed
 - the forecast: each method on simple made-up prices, the model learning the right carry-over, and the backtest never seeing the week it's predicting
 
 ## Built with
