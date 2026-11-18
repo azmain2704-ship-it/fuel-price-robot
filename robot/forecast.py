@@ -6,7 +6,7 @@ Four ways of guessing next week's price, all scored on the same backtest:
 2. Straight line: fit a line through the last 4 weeks and carry it on. (My first try. It lost to naive.)
 3. Repeat: assume last week's change happens again. Simple, and already much better than naive.
 4. Momentum: learn from the history how much of last week's change carries on into next week, using
-   scikit-learn's LinearRegression on the weekly changes. About 78% does, not 100%. Over the last year it's level
+   scikit-learn's LinearRegression on the weekly changes. About 77% does, not 100%. Over the last year it's level
    with "repeat" on petrol and ahead on diesel, and it's the best of the four over the whole history since 2019,
    so it's what the dashboard uses.
 """
