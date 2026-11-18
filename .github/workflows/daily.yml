@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "fuel-price-robot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for path in data/prices.db charts; do if [ -e "$path" ]; then git add "$path"; fi; done
+          for path in data/prices.db data/prices.csv charts; do if [ -e "$path" ]; then git add "$path"; fi; done
           git diff --cached --quiet || { git commit -m "Robot: price update $(date -u +%F)" && git push; }
 
       - name: Raise an alert
