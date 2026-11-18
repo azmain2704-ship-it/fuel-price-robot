@@ -41,7 +41,7 @@ Same idea as my money tracker. 167.07p is saved as `16707` (hundredths of a penn
 
 My first idea was to fit a straight line through the last 4 weeks and carry it on. Before trusting it I backtested it: replay the last 52 weeks, predict each one using only the weeks before it, and compare it with the simplest guess there is, "same as last week". The straight line lost (1.77p average miss for petrol, against 1.56p).
 
-So I looked at the weekly *changes* instead. A week's change is usually followed by another one in the same direction, so just repeating last week's change already cut the miss to 0.92p. Then I used scikit-learn's LinearRegression to learn how much of a change actually carries on. It's about 78% for petrol and 80% for diesel, not the full 100% that "repeat" assumes. That's the forecast the dashboard shows.
+So I looked at the weekly *changes* instead. A week's change is usually followed by another one in the same direction, so just repeating last week's change already cut the miss to 0.92p. Then I used scikit-learn's LinearRegression to learn how much of a change actually carries on. It's about 77% for petrol and 80% for diesel, not the full 100% that "repeat" assumes. That's the forecast the dashboard shows.
 
 | Average miss, next week's price (last 52 weeks) | Petrol | Diesel |
 |---|---|---|
