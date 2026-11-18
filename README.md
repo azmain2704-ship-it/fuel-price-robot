@@ -35,7 +35,22 @@ Same idea as my money tracker. 167.07p is saved as `16707` (hundredths of a penn
 
 ## The dashboard
 
-`dashboard.py` is a Streamlit page that reads the same database. It shows this week's prices and the change since last week, a chart you can hover over and set to 6 months, 1 year, 2 years or everything since 2018, the numbers as a table, and a log of the robot's recent runs.
+`dashboard.py` is a Streamlit page that reads the same database. It shows this week's prices and the change since last week, a chart you can hover over and set to 6 months, 1 year, 2 years or everything since 2018, the numbers as a table, a forecast for the next 4 weeks and a log of the robot's recent runs.
+
+## Forecasting the next 4 weeks
+
+My first idea was to fit a straight line through the last 4 weeks and carry it on. Before trusting it I backtested it: replay the last 52 weeks, predict each one using only the weeks before it, and compare it with the simplest guess there is, "same as last week". The straight line lost (1.77p average miss for petrol, against 1.56p).
+
+So I looked at the weekly *changes* instead. A week's change is usually followed by another one in the same direction, so just repeating last week's change already cut the miss to 0.92p. Then I used scikit-learn's LinearRegression to learn how much of a change actually carries on. It's about 78% for petrol and 80% for diesel, not the full 100% that "repeat" assumes. That's the forecast the dashboard shows.
+
+| Average miss, next week's price (last 52 weeks) | Petrol | Diesel |
+|---|---|---|
+| Same as last week | 1.56p | 2.42p |
+| Straight line through 4 weeks | 1.77p | 2.50p |
+| Repeat last week's change | 0.92p | 1.39p |
+| **Momentum (used on the dashboard)** | **0.93p** | **1.33p** |
+
+To be honest about it: on petrol over the last year, momentum and "repeat" are basically level. Momentum is ahead on diesel, and when I ran the same test on the year before and on everything since 2019, it came out best every time. Either way, both cut the error by about 40% compared with "same as last week". It can't predict shocks like a sudden oil price jump, and the further ahead it looks the less it can be trusted. The code is in `robot/forecast.py`.
 
 ## Running it yourself
 
@@ -51,7 +66,7 @@ streamlit run dashboard.py      # open the dashboard
 
 ## Tests
 
-`pytest` runs 20 tests against a saved copy of the real CSV and a fake API response, so they don't need the internet. They cover:
+`pytest` runs 31 tests against a saved copy of the real CSV and a fake API response, so they don't need the internet. They cover:
 
 - finding the right CSV (not the old 2003 to 2017 one)
 - reading the real file format
@@ -61,10 +76,11 @@ streamlit run dashboard.py      # open the dashboard
 - an alert only firing once per jump
 - failures getting logged
 - the chart only being redrawn when something changed
+- the forecast: each method on simple made-up prices, the model learning the right carry-over, and the backtest never seeing the week it's predicting
 
 ## Built with
 
-Python, requests, SQLite, GitHub Actions, matplotlib, Streamlit and Altair, with pytest for the tests.
+Python, requests, SQLite, GitHub Actions, matplotlib, scikit-learn, Streamlit and Altair, with pytest for the tests.
 
 ## Data
 
