@@ -5,6 +5,8 @@
 
 The follow-up to my [UK fuel prices](https://github.com/azmain2704-ship-it/uk-fuel-prices) project. In that one I downloaded the government's CSV once and analysed it. This time I wanted the data to keep itself up to date, so a GitHub Action wakes up every morning, checks for new prices, saves them, redraws the chart below and emails me if petrol or diesel moves more than 5% in a week. There's also a Streamlit dashboard for looking through the data.
 
+**Live dashboard: [uk-fuel-price-robot.streamlit.app](https://uk-fuel-price-robot.streamlit.app)**
+
 ![UK pump prices over the last year](charts/prices.png)
 
 *The robot draws this chart itself and commits it whenever new figures come out, so it's always current.*
