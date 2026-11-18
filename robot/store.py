@@ -1,4 +1,5 @@
 """Saving the prices in a small SQLite database (data/prices.db), which the robot commits back to the repo."""
+import csv
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -67,3 +68,21 @@ def log_run(conn, status, new_weeks=0, changed=0, message=""):
 def latest_weeks(conn, n=2):
     """The n most recent weeks, newest first."""
     return conn.execute("SELECT * FROM prices ORDER BY week DESC LIMIT ?", (n,)).fetchall()
+
+
+def pence_text(hundredths):
+    """16707 -> '167.07', using whole numbers only so nothing gets rounded on the way out."""
+    return f"{hundredths // 100}.{hundredths % 100:02d}"
+
+
+def export_csv(conn, path):
+    """Write every week to a CSV in plain pence (167.07, not 16707), for Power BI and spreadsheets."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = conn.execute("SELECT week, petrol, diesel FROM prices ORDER BY week").fetchall()
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["week", "petrol_pence", "diesel_pence"])
+        for r in rows:
+            writer.writerow([r["week"], pence_text(r["petrol"]), pence_text(r["diesel"])])
+    return path
