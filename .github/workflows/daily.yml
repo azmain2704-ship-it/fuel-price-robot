@@ -1,0 +1,48 @@
+name: daily-robot
+
+on:
+  schedule:
+    - cron: "17 7 * * *"   # every day at 07:17 UTC
+  workflow_dispatch:       # lets me run it by hand from the Actions tab
+    inputs:
+      test_alert:
+        description: "Send a test alert (to check the email arrives)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # to commit the updated database and chart
+  issues: write     # to open an issue when prices jump
+
+concurrency:
+  group: daily-robot
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-robot.txt
+
+      - name: Collect the latest prices
+        env:
+          ALERT_MENTION: ${{ github.repository_owner }}
+        run: python -m robot.run --alert-file alert.md ${{ inputs.test_alert && '--test-alert' || '' }}
+
+      - name: Save the database and chart back to the repo
+        if: always()
+        run: |
+          git config user.name "fuel-price-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for path in data/prices.db charts; do if [ -e "$path" ]; then git add "$path"; fi; done
+          git diff --cached --quiet || { git commit -m "Robot: price update $(date -u +%F)" && git push; }
+
+      - name: Raise an alert
+        if: hashFiles('alert.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "$(head -n 1 alert.md)" --body "$(tail -n +3 alert.md)"
