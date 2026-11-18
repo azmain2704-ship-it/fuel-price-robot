@@ -75,7 +75,8 @@ rule = alt.Chart(shown).mark_rule(color=MUTED, strokeWidth=1).encode(
 ends = base.transform_filter(alt.datum.week == alt.expr.toDate(latest.week.isoformat())).mark_text(
     align="left", dx=8, fontSize=12).encode(text=alt.Text("pence:Q", format=".1f"), color=alt.value(MUTED))
 
-st.altair_chart((lines + points + rule + ends).properties(height=380), use_container_width=True)
+chart = (lines + points + rule + ends).properties(height=380, padding={"left": 5, "top": 5, "bottom": 5, "right": 50})
+st.altair_chart(chart, use_container_width=True)
 
 with st.expander("See the numbers as a table"):
     table = shown.sort_values("week", ascending=False).rename(
