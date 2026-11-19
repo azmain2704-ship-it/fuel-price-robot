@@ -52,6 +52,14 @@ So I looked at the weekly *changes* instead. A week's change is usually followed
 
 To be honest about it: on petrol over the last year, momentum and "repeat" are basically level. Momentum is ahead on diesel, and when I ran the same test on the year before and on everything since 2019, it came out best every time. Either way, both cut the error by about 40% compared with "same as last week". It can't predict shocks like a sudden oil price jump, and the further ahead it looks the less it can be trusted. The code is in `robot/forecast.py`.
 
+## Power BI version
+
+The robot also writes `data/prices.csv` every time prices change. `powerbi/uk-fuel-prices.pbix` reads that file straight from GitHub, so clicking Refresh in Power BI Desktop pulls in the latest week. Power Query loads and cleans it (prices as fixed decimals so pence don't pick up rounding errors, plus a diesel premium column and a year column), and DAX measures work out the latest prices and the change on the week. Every number on the page follows the date-range slicer, so picking 2022 shows that year's prices, changes and premium.
+
+There's a [PDF export](powerbi/uk-fuel-prices.pdf) if you don't have Power BI.
+
+![Power BI dashboard](powerbi/dashboard.png)
+
 ## Running it yourself
 
 On Windows, double-click `run_robot.bat`. It sets everything up the first time, collects the latest prices and opens the dashboard. Or by hand:
@@ -80,7 +88,7 @@ streamlit run dashboard.py      # open the dashboard
 
 ## Built with
 
-Python, requests, SQLite, GitHub Actions, matplotlib, scikit-learn, Streamlit and Altair, with pytest for the tests.
+Python, requests, SQLite, GitHub Actions, matplotlib, scikit-learn, Streamlit, Altair and Power BI (Power Query and DAX), with pytest for the tests.
 
 ## Data
 
